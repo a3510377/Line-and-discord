@@ -130,25 +130,38 @@ export class Client extends EventEmitter {
       )
         return;
 
-      const bodyData = new FormData();
+      if (event.content) {
+        const bodyData = new FormData();
+
+        bodyData.append(
+          "message",
+          `<${event.member?.nickname || event.author.username}>:\n${
+            event.content
+          }`
+        );
+
+        axios
+          .post("https://notify-api.line.me/api/notify", bodyData, {
+            headers: { Authorization: `Bearer ${process.env.NOTIFY_TOKEN}` },
+          })
+          .catch();
+      }
 
       await Promise.all(
         event.attachments.map(async (data) => {
+          const bodyData = new FormData();
           if (data.contentType?.split("/")[0] === "image") {
             bodyData.append("imageFullsize", data.url);
             bodyData.append("imageThumbnail", data.url);
           } else event.content += `\n${data.url}`;
+
+          axios
+            .post("https://notify-api.line.me/api/notify", bodyData, {
+              headers: { Authorization: `Bearer ${process.env.NOTIFY_TOKEN}` },
+            })
+            .catch();
         })
       );
-      bodyData.append(
-        "message",
-        `<${event.member?.nickname || event.author.username}>:\n${
-          event.content
-        }`
-      );
-      axios.post("https://notify-api.line.me/api/notify", bodyData, {
-        headers: { Authorization: `Bearer ${process.env.NOTIFY_TOKEN}` },
-      });
     });
   }
 
