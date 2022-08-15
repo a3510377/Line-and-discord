@@ -1,3 +1,4 @@
+import fs from "fs";
 import axios from "axios";
 import FormData from "form-data";
 import express, { Express } from "express";
@@ -131,17 +132,21 @@ export class Client extends EventEmitter {
         return;
 
       const bodyData = new FormData();
+
+      await Promise.all(
+        event.attachments.map(async (data) => {
+          if (data.contentType?.split("/")[0] === "image") {
+            bodyData.append("imageFullsize", data.url);
+            bodyData.append("imageThumbnail", data.url);
+          } else event.content += `\n${data.url}`;
+        })
+      );
       bodyData.append(
         "message",
         `<${event.member?.nickname || event.author.username}>:\n${
           event.content
         }`
       );
-      event.attachments.forEach((data) => {
-        bodyData.append("imageThumbnail", data.url);
-        bodyData.append("imageFullsize", data.url);
-      });
-
       axios.post("https://notify-api.line.me/api/notify", bodyData, {
         headers: { Authorization: `Bearer ${process.env.NOTIFY_TOKEN}` },
       });
