@@ -82,7 +82,7 @@ export class Client extends EventEmitter {
     });
 
     this.on("message", async (event) => {
-      if (event.source.type !== "group") return;
+      if (event.source.type !== "group") return console.log(event);
 
       const source = event.source;
       const author = await this.line.getGroupMemberProfile(
@@ -124,20 +124,25 @@ export class Client extends EventEmitter {
     });
 
     this.client.on("messageCreate", async (event) => {
-      if (
-        event.channelId !== process.env.DISCORD_CHANNEL_ID ||
-        event.author.bot
-      )
+      const { channel, reference, attachments, member, author } = event;
+
+      if (event.channelId !== process.env.DISCORD_CHANNEL_ID || author.bot)
         return;
 
+      let content = event.content;
+
+      if (reference?.messageId) {
+        const referenceMsg = await channel.messages.fetch(reference.messageId);
+        if (referenceMsg) {
+          content = `${referenceMsg.content || "..."} > ${content}`;
+        }
+      }
       if (event.content) {
         const bodyData = new FormData();
 
         bodyData.append(
           "message",
-          `<${event.member?.nickname || event.author.username}>:\n${
-            event.content
-          }`
+          `<${member?.nickname || author.username}>:\n${content}`
         );
 
         axios
@@ -148,12 +153,12 @@ export class Client extends EventEmitter {
       }
 
       await Promise.all(
-        event.attachments.map(async (data) => {
+        attachments.map(async (data) => {
           const bodyData = new FormData();
           if (data.contentType?.split("/")[0] === "image") {
             bodyData.append(
               "message",
-              `<${event.member?.nickname || event.author.username}>:`
+              `<${member?.nickname || author.username}>:`
             );
             bodyData.append("imageFullsize", data.url);
             bodyData.append("imageThumbnail", data.url);
