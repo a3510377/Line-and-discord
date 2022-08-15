@@ -151,6 +151,10 @@ export class Client extends EventEmitter {
         event.attachments.map(async (data) => {
           const bodyData = new FormData();
           if (data.contentType?.split("/")[0] === "image") {
+            bodyData.append(
+              "message",
+              `<${event.member?.nickname || event.author.username}>:`
+            );
             bodyData.append("imageFullsize", data.url);
             bodyData.append("imageThumbnail", data.url);
           } else event.content += `\n${data.url}`;
