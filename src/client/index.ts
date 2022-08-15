@@ -81,8 +81,14 @@ export class Client extends EventEmitter {
       res.send("ok");
     });
 
+    this.on("join", async ({ source }) => {
+      if (source.type === "group") this.line.leaveGroup(source.groupId);
+      else if (source.type === "room") this.line.leaveRoom(source.roomId);
+    });
     this.on("message", async (event) => {
-      if (event.source.type !== "group") return console.log(event);
+      console.log(event);
+
+      if (event.source.type !== "group") return;
 
       const source = event.source;
       const author = await this.line.getGroupMemberProfile(
@@ -163,7 +169,7 @@ export class Client extends EventEmitter {
             bodyData.append("imageFullsize", data.url);
             bodyData.append("imageThumbnail", data.url);
           } else event.content += `\n${data.url}`;
-
+          // deliveryContext: { isRedelivery: false },
           axios
             .post("https://notify-api.line.me/api/notify", bodyData, {
               headers: { Authorization: `Bearer ${process.env.NOTIFY_TOKEN}` },
