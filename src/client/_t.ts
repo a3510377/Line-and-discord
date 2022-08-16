@@ -1,4 +1,5 @@
 import axios from "axios";
+import { MessagePayload, WebhookMessageOptions } from "discord.js";
 import { BaseClient } from "./baseClient";
 
 export class Client extends BaseClient {
@@ -14,45 +15,46 @@ export class Client extends BaseClient {
     });
     this.on("message", async (event) => {
       console.log(event);
-      const { source, message: msg } = event;
 
-      if (source.type !== "group" || !source.userId) return;
+      if (event.source.type !== "group") return;
 
-      const profile = await this.line.getGroupMemberProfile(
+      const source = event.source;
+      const author = await this.line.getGroupMemberProfile(
         source.groupId,
-        source.userId
+        <string>source.userId
       );
+      const postData: string | MessagePayload | WebhookMessageOptions = {
+        username: author.displayName,
+        avatarURL: author.pictureUrl,
+      };
 
-      switch (msg.type) {
-        case "text":
-          this.sendDiscord({
-            avatarURL: profile.pictureUrl,
-            username: profile.displayName,
-            content: msg.text || "",
-          });
-
-          break;
-
-        case "image":
-          switch (msg.contentProvider.type) {
-            case "line": {
-              const { contentProvider } = msg;
-              contentProvider;
-
-              break;
-            }
-            case "external": {
-              this.sendDiscord({
-                avatarURL: profile.pictureUrl,
-                username: profile.displayName,
-                content: "發送了一張圖片",
-                files: [msg.contentProvider.originalContentUrl],
-              });
-
-              break;
-            }
-          }
+      if (event.message.type === "text") postData.content = event.message.text;
+      else if (event.message.type === "sticker") {
+        postData.content = `發送了一個 ${
+          event.message.keywords?.[0] || "不知名"
+        } 貼圖`;
+      } else if (event.message.type === "file") {
+        postData.files = [
+          await this.getLineMessageFile(
+            event.message.id,
+            event.message.fileName
+          ),
+        ];
+      } else if (event.message.type == "image") {
+        postData.files = [
+          await this.getLineMessageFile(event.message.id, "media.jpg"),
+        ];
+      } else if (event.message.type == "video") {
+        postData.files = [
+          await this.getLineMessageFile(event.message.id, "media.mp4"),
+        ];
+      } else if (event.message.type == "audio") {
+        postData.files = [
+          await this.getLineMessageFile(event.message.id, "media.mp3"),
+        ];
       }
+
+      this.webhook.send(postData).catch();
     });
 
     this.client.on("messageCreate", async (event) => {
@@ -83,6 +85,7 @@ export class Client extends BaseClient {
           })
           .catch();
       }
+
       await Promise.all(
         attachments.map(async (data) => {
           const bodyData = new FormData();
