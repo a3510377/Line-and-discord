@@ -1,3 +1,5 @@
+import fs from "fs";
+
 import axios from "axios";
 import EventEmitter from "events";
 import express, { Express } from "express";
@@ -109,6 +111,33 @@ export class BaseClient extends EventEmitter {
 
   public AnimLINEStampUrl(packageID: string, stickerID: string) {
     return `https://stickershop.line-scdn.net/products/0/0/1/${packageID}/android/animation/${stickerID}.gif`;
+  }
+
+  protected writeStoreData(data: Record<string, string>): void {
+    fs.writeFileSync("./store.json", JSON.stringify(data), {
+      encoding: "utf8",
+    });
+  }
+  public getStoreData(): Record<string, string> {
+    try {
+      return JSON.parse(fs.readFileSync("./store.json", "utf8"));
+    } catch {
+      this.writeStoreData({});
+      return this.getStoreData();
+    }
+  }
+  public createGuildData(channelId: string, guildId: string) {
+    const data = this.getStoreData();
+
+    data[channelId] = guildId;
+
+    this.writeStoreData(data);
+  }
+  public getGuildData(guildId: string): string | undefined {
+    return this.getStoreData()[guildId];
+  }
+  public getChannelData(channelId: string): string | undefined {
+    return this.getStoreData()[channelId];
   }
 }
 
