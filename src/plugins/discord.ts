@@ -35,9 +35,15 @@ export class DiscordPlugin extends BasePlugin {
           );
 
           if (referenceMsg) {
-            content =
-              ((referenceMsg.member?.nickname || referenceMsg.author.username) +
-                `-${referenceMsg.content}` || "...") + ` > ${content}`;
+            const userName =
+              referenceMsg.member?.nickname || referenceMsg.author.username;
+            content = [
+              `${userName}-${referenceMsg.content}`,
+              referenceMsg.attachments.size > 0
+                ? " ( attachments in message... )"
+                : "",
+              ` > ${content}`,
+            ].join("");
           }
         }
 
