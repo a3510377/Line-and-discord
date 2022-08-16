@@ -82,7 +82,13 @@ export class Client extends BaseClient {
         this.sendDiscord({
           avatarURL: profile.pictureUrl,
           username: profile.displayName,
-          files: [await this.getLINEFile("MEDIA", msg.id)],
+          files: [
+            await this.getLINEFile(
+              "MEDIA",
+              msg.id,
+              type === "audio" ? ".mp3" : ".mp4"
+            ),
+          ],
         });
       }
     });

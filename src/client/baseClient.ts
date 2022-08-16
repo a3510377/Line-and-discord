@@ -73,7 +73,7 @@ export class BaseClient extends EventEmitter {
   public async getLINEFile(
     fileName: string,
     messageId: string,
-    ext = true
+    ext: string | boolean = true
   ): Promise<AttachmentPayload> {
     return await axios
       .get(`https://api-data.line.me/v2/bot/message/${messageId}/content`, {
@@ -81,7 +81,9 @@ export class BaseClient extends EventEmitter {
         responseType: "arraybuffer",
       })
       .then(({ data }) => ({
-        name: fileName + (ext ? `.${getFileExt(new Uint8Array(data))}` : ""),
+        name:
+          fileName +
+          (ext === true ? `.${getFileExt(new Uint8Array(data))}` : ext || ""),
         attachment: data,
       }));
   }
