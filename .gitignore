@@ -129,3 +129,4 @@ dist
 .vite-ssg-temp
 
 catch-*.json
+store.json

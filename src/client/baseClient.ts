@@ -22,6 +22,7 @@ export class BaseClient extends EventEmitter {
   public readonly line: LineClient;
   public readonly client: DCClient;
   protected readonly config: ClientConfig;
+  protected plugins: Record<string, BasePlugin> = {};
   public sendDiscord: InstanceType<typeof WebhookClient>["send"];
 
   public constructor(protected options?: ClientOptionals) {
@@ -102,9 +103,13 @@ export class BaseClient extends EventEmitter {
   }
 
   public addPlugin(plugin: BasePlugin) {
-    console.log(plugin);
+    if (this.plugins[plugin.name]) {
+      throw new Error(`Plugin ${plugin.name} is already registered`);
+    }
 
-    // plugin.register(this);
+    this.plugins[plugin.name] = plugin;
+
+    plugin.register(this);
   }
 
   public start() {
@@ -120,12 +125,12 @@ export class BaseClient extends EventEmitter {
     return `https://stickershop.line-scdn.net/products/0/0/1/${packageID}/android/animation/${stickerID}.gif`;
   }
 
-  protected writeStoreData(data: Record<string, string>): void {
+  protected writeStoreData(data: StoreConfig): void {
     fs.writeFileSync("./store.json", JSON.stringify(data), {
       encoding: "utf8",
     });
   }
-  public getStoreData(): Record<string, string> {
+  public getStoreData(): StoreConfig {
     try {
       return JSON.parse(fs.readFileSync("./store.json", "utf8"));
     } catch {
@@ -133,18 +138,32 @@ export class BaseClient extends EventEmitter {
       return this.getStoreData();
     }
   }
-  public createGuildData(channelId: string, guildId: string) {
+  public createGuildData(
+    channelId: string,
+    lineGuildId: string,
+    webhookURL: string
+  ) {
     const data = this.getStoreData();
 
-    data[channelId] = guildId;
+    data[lineGuildId] = { channelId, webhookURL };
 
     this.writeStoreData(data);
   }
-  public getGuildData(guildId: string): string | undefined {
-    return this.getStoreData()[guildId];
+  public getConfigByChannelID(
+    channelID: string
+  ): (StoreConfig[string] & { guildId: string }) | undefined {
+    const data = this.getStoreData();
+
+    const guildId = Object.keys(data).find(
+      (key) => data[key].channelId === channelID
+    );
+
+    if (!guildId) return undefined;
+
+    return { ...data[guildId], guildId };
   }
-  public getChannelData(channelId: string): string | undefined {
-    return this.getStoreData()[channelId];
+  public getConfigByGuildID(guildID: string): StoreConfig[string] | undefined {
+    return this.getStoreData()[guildID];
   }
 }
 
@@ -189,4 +208,8 @@ export interface ClientConfig extends Required<ClientOptionals> {
     channelAccessToken: string;
     channelSecret: string;
   };
+}
+
+export interface StoreConfig {
+  [guildId: string]: { webhookURL: string; channelId: string };
 }

@@ -2,33 +2,40 @@ import { BasePlugin, BaseClient } from ".";
 
 export class DiscordPlugin extends BasePlugin {
   public register(_: BaseClient) {
-    _.client.on("messageCreate", async (event) => {
-      const { channel, reference, author } = event;
+    _.client.on("ready", (bot) => {
+      console.log(`Discord bot ${bot.user.username} is ready.`);
+    });
+    _.client.on("messageCreate", async (msg) => {
+      const { channel, reference, member, author } = msg;
 
-      const lineGuildId = _.getChannelData(channel.id);
+      const config = _.getConfigByChannelID(channel.id);
+
       if (
-        !lineGuildId ||
+        !config ||
         channel.isDMBased() ||
-        author.id !== _.client.user?.id
+        author.id === _.client.user?.id ||
+        msg.webhookId
       )
         return;
 
-      _.line.pushMessage(lineGuildId, {
-        type: "text",
-        text: "awa",
-      });
+      const { guildId } = config;
 
-      // if (event.channelId !== process.env.DISCORD_CHANNEL_ID || author.bot)
-      //   return;
-
-      let content = event.content;
+      let content = msg.content;
 
       if (reference?.messageId) {
         const referenceMsg = await channel.messages.fetch(reference.messageId);
+
         if (referenceMsg) {
-          content = `${referenceMsg.content || "..."} > ${content}`;
+          content =
+            ((referenceMsg.member?.nickname || referenceMsg.author.username) +
+              `-${referenceMsg.content}` || "...") + ` > ${content}`;
         }
       }
+
+      _.line.pushMessage(guildId, {
+        type: "text",
+        text: `${member?.nickname || author.username}:\n${content}`,
+      });
     });
   }
 }

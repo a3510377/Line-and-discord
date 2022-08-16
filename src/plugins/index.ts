@@ -5,6 +5,10 @@ export class BasePlugin {
   public register(_client: BaseClient) {
     throw new Error("Method not implemented.");
   }
+
+  get name(): string {
+    return this.constructor.name;
+  }
 }
 
 export { BaseClient };
