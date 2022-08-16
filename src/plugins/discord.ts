@@ -47,8 +47,10 @@ export class DiscordPlugin extends BasePlugin {
           });
         } else if (contentType?.startsWith("audio/")) {
           msgList.push({ type: "audio", originalContentUrl: url, duration: 0 });
-        }
+        } else msgList.push({ type: "text", text: url });
       });
+
+      if (msgList.length <= 0) return;
 
       _.line.pushMessage(
         guildId,
