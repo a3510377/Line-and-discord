@@ -1,5 +1,4 @@
-import axios from "axios";
-import FormData from "form-data";
+import { FileEventMessage } from "@line/bot-sdk";
 import { BaseClient } from "./baseClient";
 
 export class Client extends BaseClient {
@@ -24,39 +23,68 @@ export class Client extends BaseClient {
         source.userId
       );
 
-      switch (msg.type) {
-        case "text":
+      const type = msg.type;
+
+      if (type === "text") {
+        // TEXT
+        this.sendDiscord({
+          avatarURL: profile.pictureUrl,
+          username: profile.displayName,
+          content: msg.text,
+        });
+      } else if (type === "image") {
+        // IMAGE
+        if (msg.contentProvider.type === "line") {
           this.sendDiscord({
             avatarURL: profile.pictureUrl,
             username: profile.displayName,
-            content: msg.text || "",
+            content: "發送了一張圖片",
+            files: [await this.getLINEFile("MEDIA", msg.id)],
           });
+        } else {
+          this.sendDiscord({
+            avatarURL: profile.pictureUrl,
+            username: profile.displayName,
+            content: "發送了一張圖片",
+            files: [msg.contentProvider.originalContentUrl],
+          });
+        }
+      } else if (type === "sticker") {
+        // STICKER
+        const { packageId, stickerId, stickerResourceType } = msg;
 
-          break;
-
-        case "image":
-          switch (msg.contentProvider.type) {
-            case "line": {
-              this.sendDiscord({
-                avatarURL: profile.pictureUrl,
-                username: profile.displayName,
-                content: "發送了一張圖片",
-                files: [(await this.getLINEFile("MEDIA", msg.id)).attachment],
-              });
-
-              break;
-            }
-            case "external": {
-              this.sendDiscord({
-                avatarURL: profile.pictureUrl,
-                username: profile.displayName,
-                content: "發送了一張圖片",
-                files: [msg.contentProvider.originalContentUrl],
-              });
-
-              break;
-            }
-          }
+        this.sendDiscord({
+          avatarURL: profile.pictureUrl,
+          username: profile.displayName,
+          content: "發送了一張圖片",
+          files: [
+            ["ANIMATION", "ANIMATION_SOUND"].includes(stickerResourceType)
+              ? this.AnimLINEStampUrl(packageId, stickerId)
+              : this.LINEStampUrl(stickerId),
+          ],
+        });
+      } else if (type === "file") {
+        // FILE
+        this.sendDiscord({
+          avatarURL: profile.pictureUrl,
+          username: profile.displayName,
+          content: "發送了一張圖片",
+          files: [
+            await this.getLINEFile(
+              (<FileEventMessage>event.message).fileName,
+              msg.id,
+              false
+            ),
+          ],
+        });
+      } else if (type === "audio" || type === "video") {
+        // AUDIO, VIDEO
+        this.sendDiscord({
+          avatarURL: profile.pictureUrl,
+          username: profile.displayName,
+          content: "發送了一張圖片",
+          files: [await this.getLINEFile("MEDIA", msg.id)],
+        });
       }
     });
 

@@ -72,7 +72,8 @@ export class BaseClient extends EventEmitter {
 
   public async getLINEFile(
     fileName: string,
-    messageId: string
+    messageId: string,
+    ext = true
   ): Promise<AttachmentPayload> {
     return await axios
       .get(`https://api-data.line.me/v2/bot/message/${messageId}/content`, {
@@ -80,7 +81,7 @@ export class BaseClient extends EventEmitter {
         responseType: "arraybuffer",
       })
       .then(({ data }) => ({
-        name: `${fileName}.${getMimeType(new Uint8Array(data))}`,
+        name: fileName + (ext ? `.${getMimeType(new Uint8Array(data))}` : ""),
         attachment: data,
       }));
   }
@@ -132,6 +133,14 @@ export class BaseClient extends EventEmitter {
           });
         }),
     };
+  }
+
+  public LINEStampUrl(stickerID: string) {
+    return `https://stickershop.line-scdn.net/stickershop/v1/sticker/${stickerID}/iphone/sticker.png`;
+  }
+
+  public AnimLINEStampUrl(packageID: string, stickerID: string) {
+    return `https://stickershop.line-scdn.net/products/0/0/1/${packageID}/iphone/animation/${stickerID}.png`;
   }
 }
 
