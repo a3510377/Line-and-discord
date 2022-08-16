@@ -32,9 +32,26 @@ export class DiscordPlugin extends BasePlugin {
         }
       }
 
-      _.line.pushMessage(guildId, {
-        type: "text",
-        text: `${member?.nickname || author.username}:\n${content}`,
+      if (content) {
+        _.line.pushMessage(guildId, {
+          type: "text",
+          text: content,
+          sender: {
+            name: member?.nickname || author.username,
+            iconUrl: author.avatarURL()?.replace(/\.webp$/, ".png") || void 0,
+          },
+        });
+      }
+      msg.attachments.each(async (attachment) => {
+        attachment.contentType;
+
+        if (attachment.contentType?.startsWith("image/")) {
+          _.line.pushMessage(guildId, {
+            type: "image",
+            previewImageUrl: attachment.url,
+            originalContentUrl: attachment.url,
+          });
+        }
       });
     });
   }
