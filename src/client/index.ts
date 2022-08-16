@@ -1,6 +1,7 @@
 import { BaseClient } from "./baseClient";
 
-import { LinePlugin, DiscordPlugin } from "../plugins";
+import { LinePlugin } from "../plugins/line";
+import { DiscordPlugin } from "../plugins/discord";
 
 export class Client extends BaseClient {
   constructor() {

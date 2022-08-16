@@ -3,14 +3,14 @@ import { FileEventMessage } from "@line/bot-sdk";
 import { BasePlugin, BaseClient } from ".";
 
 export class LinePlugin extends BasePlugin {
-  public register(_: BaseClient) {
-    _.on("message", async (event) => {
+  public register(bot: BaseClient) {
+    bot.on("message", async (event) => {
       console.log(event);
       const { source, message: msg } = event;
 
-      if (source.type !== "group" || !source.userId) return;
+      if (!source.userId || source.type !== "group") return;
 
-      const profile = await _.line.getGroupMemberProfile(
+      const profile = await bot.line.getGroupMemberProfile(
         source.groupId,
         source.userId
       );
@@ -19,7 +19,7 @@ export class LinePlugin extends BasePlugin {
 
       if (type === "text") {
         // TEXT
-        _.sendDiscord({
+        bot.sendDiscord({
           avatarURL: profile.pictureUrl,
           username: profile.displayName,
           content: msg.text,
@@ -27,13 +27,13 @@ export class LinePlugin extends BasePlugin {
       } else if (type === "image") {
         // IMAGE
         if (msg.contentProvider.type === "line") {
-          _.sendDiscord({
+          bot.sendDiscord({
             avatarURL: profile.pictureUrl,
             username: profile.displayName,
-            files: [await _.getLINEFile("MEDIA", msg.id)],
+            files: [await bot.getLINEFile("MEDIA", msg.id)],
           });
         } else {
-          _.sendDiscord({
+          bot.sendDiscord({
             avatarURL: profile.pictureUrl,
             username: profile.displayName,
             files: [msg.contentProvider.originalContentUrl],
@@ -43,22 +43,22 @@ export class LinePlugin extends BasePlugin {
         // STICKER
         const { packageId, stickerId, stickerResourceType } = msg;
 
-        _.sendDiscord({
+        bot.sendDiscord({
           avatarURL: profile.pictureUrl,
           username: profile.displayName,
           files: [
             ["ANIMATION", "ANIMATION_SOUND"].includes(stickerResourceType)
-              ? _.AnimLINEStampUrl(packageId, stickerId)
-              : _.LINEStampUrl(stickerId),
+              ? bot.AnimLINEStampUrl(packageId, stickerId)
+              : bot.LINEStampUrl(stickerId),
           ],
         });
       } else if (type === "file") {
         // FILE
-        _.sendDiscord({
+        bot.sendDiscord({
           avatarURL: profile.pictureUrl,
           username: profile.displayName,
           files: [
-            await _.getLINEFile(
+            await bot.getLINEFile(
               (<FileEventMessage>event.message).fileName,
               msg.id,
               false
@@ -67,11 +67,11 @@ export class LinePlugin extends BasePlugin {
         });
       } else if (type === "audio" || type === "video") {
         // AUDIO, VIDEO
-        _.sendDiscord({
+        bot.sendDiscord({
           avatarURL: profile.pictureUrl,
           username: profile.displayName,
           files: [
-            await _.getLINEFile(
+            await bot.getLINEFile(
               "MEDIA",
               msg.id,
               type === "audio" ? ".mp3" : ".mp4"

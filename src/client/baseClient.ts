@@ -102,7 +102,9 @@ export class BaseClient extends EventEmitter {
   }
 
   public addPlugin(plugin: BasePlugin) {
-    plugin.register(this);
+    console.log(plugin);
+
+    // plugin.register(this);
   }
 
   public start() {

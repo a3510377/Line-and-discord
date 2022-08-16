@@ -1,8 +1,5 @@
 import { BaseClient } from "../client/baseClient";
 
-import { LinePlugin } from "../plugins/line";
-import { DiscordPlugin } from "../plugins/discord";
-
 export class BasePlugin {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public register(_client: BaseClient) {
@@ -10,4 +7,4 @@ export class BasePlugin {
   }
 }
 
-export { BaseClient, DiscordPlugin, LinePlugin };
+export { BaseClient };
