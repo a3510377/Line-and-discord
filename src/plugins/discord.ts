@@ -1,3 +1,4 @@
+import { Message } from "@line/bot-sdk";
 import { BasePlugin, BaseClient } from ".";
 
 export class DiscordPlugin extends BasePlugin {
@@ -9,6 +10,7 @@ export class DiscordPlugin extends BasePlugin {
       const { channel, reference, member, author } = msg;
 
       const config = _.getConfigByChannelID(channel.id);
+      const msgList: Message[] = [];
 
       if (
         !config ||
@@ -32,27 +34,32 @@ export class DiscordPlugin extends BasePlugin {
         }
       }
 
-      if (content) {
-        _.line.pushMessage(guildId, {
-          type: "text",
-          text: content,
+      if (content) msgList.push({ type: "text", text: content });
+
+      msg.attachments.each(async ({ contentType, url }) => {
+        if (!contentType) return msgList.push({ type: "text", text: url });
+
+        if (/^(image|video)\//.test(contentType)) {
+          msgList.push({
+            type: contentType.startsWith("image/") ? "image" : "video",
+            previewImageUrl: url,
+            originalContentUrl: url,
+          });
+        } else if (contentType?.startsWith("audio/")) {
+          msgList.push({ type: "audio", originalContentUrl: url, duration: 0 });
+        }
+      });
+
+      _.line.pushMessage(
+        guildId,
+        msgList.map((msg) => ({
           sender: {
             name: member?.nickname || author.username,
             iconUrl: author.avatarURL()?.replace(/\.webp$/, ".png") || void 0,
           },
-        });
-      }
-      msg.attachments.each(async (attachment) => {
-        attachment.contentType;
-
-        if (attachment.contentType?.startsWith("image/")) {
-          _.line.pushMessage(guildId, {
-            type: "image",
-            previewImageUrl: attachment.url,
-            originalContentUrl: attachment.url,
-          });
-        }
-      });
+          ...msg,
+        }))
+      );
     });
   }
 }
