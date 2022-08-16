@@ -108,11 +108,11 @@ export class BaseClient extends EventEmitter {
   }
 
   public LINEStampUrl(stickerID: string) {
-    return `https://stickershop.line-scdn.net/stickershop/v1/sticker/${stickerID}/iphone/sticker.png`;
+    return `https://stickershop.line-scdn.net/stickershop/v1/sticker/${stickerID}/android/sticker.png`;
   }
 
   public AnimLINEStampUrl(packageID: string, stickerID: string) {
-    return `https://stickershop.line-scdn.net/products/0/0/1/${packageID}/iphone/animation/${stickerID}.png`;
+    return `https://stickershop.line-scdn.net/products/0/0/1/${packageID}/android/animation/${stickerID}.gif`;
   }
 }
 
