@@ -1,4 +1,5 @@
 import { FileEventMessage } from "@line/bot-sdk";
+import { WebhookClient } from "discord.js";
 
 import { BasePlugin, BaseClient } from ".";
 
@@ -9,17 +10,20 @@ export class LinePlugin extends BasePlugin {
       const { source, message: msg } = event;
 
       if (!source.userId || source.type !== "group") return;
+      const config = bot.getConfigByGuildID(source.groupId);
+      if (!config) return;
 
       const profile = await bot.line.getGroupMemberProfile(
         source.groupId,
         source.userId
       );
+      const webhook = new WebhookClient({ url: config.webhookURL });
 
       const type = msg.type;
 
       if (type === "text") {
         // TEXT
-        bot.sendDiscord({
+        webhook.send({
           avatarURL: profile.pictureUrl,
           username: profile.displayName,
           content: msg.text,
@@ -27,13 +31,13 @@ export class LinePlugin extends BasePlugin {
       } else if (type === "image") {
         // IMAGE
         if (msg.contentProvider.type === "line") {
-          bot.sendDiscord({
+          webhook.send({
             avatarURL: profile.pictureUrl,
             username: profile.displayName,
             files: [await bot.getLINEFile("MEDIA", msg.id)],
           });
         } else {
-          bot.sendDiscord({
+          webhook.send({
             avatarURL: profile.pictureUrl,
             username: profile.displayName,
             files: [msg.contentProvider.originalContentUrl],
@@ -43,7 +47,7 @@ export class LinePlugin extends BasePlugin {
         // STICKER
         const { packageId, stickerId, stickerResourceType } = msg;
 
-        bot.sendDiscord({
+        webhook.send({
           avatarURL: profile.pictureUrl,
           username: profile.displayName,
           files: [
@@ -54,7 +58,7 @@ export class LinePlugin extends BasePlugin {
         });
       } else if (type === "file") {
         // FILE
-        bot.sendDiscord({
+        webhook.send({
           avatarURL: profile.pictureUrl,
           username: profile.displayName,
           files: [
@@ -67,7 +71,7 @@ export class LinePlugin extends BasePlugin {
         });
       } else if (type === "audio" || type === "video") {
         // AUDIO, VIDEO
-        bot.sendDiscord({
+        webhook.send({
           avatarURL: profile.pictureUrl,
           username: profile.displayName,
           files: [

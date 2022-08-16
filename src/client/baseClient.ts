@@ -7,7 +7,6 @@ import { Client as LineClient, middleware, WebhookEvent } from "@line/bot-sdk";
 import {
   Client as DCClient,
   Awaitable,
-  WebhookClient,
   AttachmentPayload,
   GatewayIntentBits,
 } from "discord.js";
@@ -17,13 +16,11 @@ import { getFileExt } from "../utils/File";
 import { BasePlugin } from "../plugins";
 
 export class BaseClient extends EventEmitter {
-  public readonly webhook: WebhookClient;
   public readonly server: Express;
   public readonly line: LineClient;
   public readonly client: DCClient;
   protected readonly config: ClientConfig;
   protected plugins: Record<string, BasePlugin> = {};
-  public sendDiscord: InstanceType<typeof WebhookClient>["send"];
 
   public constructor(protected options?: ClientOptionals) {
     super();
@@ -53,7 +50,6 @@ export class BaseClient extends EventEmitter {
     };
 
     this.server = express();
-    this.webhook = new WebhookClient({ url: discordWebhook });
     this.line = new LineClient(this.config.baseLine);
     this.client = new DCClient({
       intents: [
@@ -63,7 +59,6 @@ export class BaseClient extends EventEmitter {
         GatewayIntentBits.GuildMessageReactions,
       ],
     });
-    this.sendDiscord = (...args) => this.webhook.send(...args);
 
     this.init();
   }
@@ -122,7 +117,7 @@ export class BaseClient extends EventEmitter {
   }
 
   public AnimLINEStampUrl(packageID: string, stickerID: string) {
-    return `https://stickershop.line-scdn.net/products/0/0/1/${packageID}/android/animation/${stickerID}.gif`;
+    return `https://stickershop.line-scdn.net/products/0/0/1/${packageID}/android/animation/${stickerID}.png`;
   }
 
   protected writeStoreData(data: StoreConfig): void {
