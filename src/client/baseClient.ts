@@ -11,7 +11,7 @@ import {
 } from "discord.js";
 
 import { ClientEventsArgs } from "./types";
-import { getMimeType } from "../utils/File";
+import { getFileExt } from "../utils/File";
 
 export class BaseClient extends EventEmitter {
   public readonly webhook: WebhookClient;
@@ -81,7 +81,7 @@ export class BaseClient extends EventEmitter {
         responseType: "arraybuffer",
       })
       .then(({ data }) => ({
-        name: fileName + (ext ? `.${getMimeType(new Uint8Array(data))}` : ""),
+        name: fileName + (ext ? `.${getFileExt(new Uint8Array(data))}` : ""),
         attachment: data,
       }));
   }
@@ -105,34 +105,6 @@ export class BaseClient extends EventEmitter {
   public start() {
     this.server.listen(process.env.PORT || 5000);
     this.client.login(this.config.discordToken);
-  }
-
-  public async getLineMessageFile(
-    messageId: string,
-    fileName: string
-  ): Promise<AttachmentPayload> {
-    return {
-      name: fileName,
-      attachment: await this.line
-        .getMessageContent(messageId)
-        .then(async (stream) => {
-          return await new Promise((resolve) => {
-            let totalLength = 0;
-            const bufArray: Buffer[] = [];
-
-            stream
-              .on("readable", () => {
-                let chunk;
-
-                while ((chunk = stream.read()) !== null) {
-                  totalLength += chunk.length;
-                  bufArray.push(chunk);
-                }
-              })
-              .on("end", () => resolve(Buffer.concat(bufArray, totalLength)));
-          });
-        }),
-    };
   }
 
   public LINEStampUrl(stickerID: string) {
