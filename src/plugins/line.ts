@@ -2,8 +2,8 @@ import { FileEventMessage } from "@line/bot-sdk";
 
 import { BasePlugin, BaseClient } from ".";
 
-export class LineBot extends BasePlugin {
-  public registerEvents(_: BaseClient) {
+export class LinePlugin extends BasePlugin {
+  public register(_: BaseClient) {
     _.on("message", async (event) => {
       console.log(event);
       const { source, message: msg } = event;
@@ -30,14 +30,12 @@ export class LineBot extends BasePlugin {
           _.sendDiscord({
             avatarURL: profile.pictureUrl,
             username: profile.displayName,
-            content: "發送了一張圖片",
             files: [await _.getLINEFile("MEDIA", msg.id)],
           });
         } else {
           _.sendDiscord({
             avatarURL: profile.pictureUrl,
             username: profile.displayName,
-            content: "發送了一張圖片",
             files: [msg.contentProvider.originalContentUrl],
           });
         }
@@ -48,7 +46,6 @@ export class LineBot extends BasePlugin {
         _.sendDiscord({
           avatarURL: profile.pictureUrl,
           username: profile.displayName,
-          content: "發送了一張圖片",
           files: [
             ["ANIMATION", "ANIMATION_SOUND"].includes(stickerResourceType)
               ? _.AnimLINEStampUrl(packageId, stickerId)
@@ -60,7 +57,6 @@ export class LineBot extends BasePlugin {
         _.sendDiscord({
           avatarURL: profile.pictureUrl,
           username: profile.displayName,
-          content: "發送了一張圖片",
           files: [
             await _.getLINEFile(
               (<FileEventMessage>event.message).fileName,

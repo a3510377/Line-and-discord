@@ -1,12 +1,13 @@
 import { BaseClient } from "../client/baseClient";
 
-export class BasePlugin {
-  constructor(protected client: BaseClient) {}
+import { LinePlugin } from "../plugins/line";
+import { DiscordPlugin } from "../plugins/discord";
 
+export class BasePlugin {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public registerEvents(_client: BaseClient) {
+  public register(_client: BaseClient) {
     throw new Error("Method not implemented.");
   }
 }
 
-export { BaseClient };
+export { BaseClient, DiscordPlugin, LinePlugin };

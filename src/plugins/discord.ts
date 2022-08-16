@@ -1,7 +1,7 @@
 import { BasePlugin, BaseClient } from ".";
 
-export class LineBot extends BasePlugin {
-  public registerEvents(_: BaseClient) {
+export class DiscordPlugin extends BasePlugin {
+  public register(_: BaseClient) {
     _.client.on("messageCreate", async (event) => {
       const { channel, reference, author } = event;
 

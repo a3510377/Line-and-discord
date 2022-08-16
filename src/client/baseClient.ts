@@ -14,6 +14,7 @@ import {
 
 import { ClientEventsArgs } from "./types";
 import { getFileExt } from "../utils/File";
+import { BasePlugin } from "../plugins";
 
 export class BaseClient extends EventEmitter {
   public readonly webhook: WebhookClient;
@@ -98,6 +99,10 @@ export class BaseClient extends EventEmitter {
         res.send("ok");
       }
     );
+  }
+
+  public addPlugin(plugin: BasePlugin) {
+    plugin.register(this);
   }
 
   public start() {
