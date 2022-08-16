@@ -8,10 +8,6 @@ export class Client extends BaseClient {
   }
 
   protected registerEvents() {
-    this.on("join", async ({ source }) => {
-      if (source.type === "group") this.line.leaveGroup(source.groupId);
-      else if (source.type === "room") this.line.leaveRoom(source.roomId);
-    });
     this.on("message", async (event) => {
       console.log(event);
       const { source, message: msg } = event;
@@ -100,8 +96,8 @@ export class Client extends BaseClient {
         text: "awa",
       });
 
-      if (event.channelId !== process.env.DISCORD_CHANNEL_ID || author.bot)
-        return;
+      // if (event.channelId !== process.env.DISCORD_CHANNEL_ID || author.bot)
+      //   return;
 
       let content = event.content;
 

@@ -29,15 +29,13 @@ export class BaseClient extends EventEmitter {
       channelSecret = process.env.LINE_BOT_SECRET,
       discordWebhook = process.env.DISCORD_WEBHOOK,
       discordToken = process.env.DISCORD_TOKEN,
-      discordChannelId = process.env.DISCORD_CHANNEL_ID,
     } = options || {};
 
     if (
       !channelAccessToken ||
       !channelSecret ||
       !discordWebhook ||
-      !discordToken ||
-      !discordChannelId
+      !discordToken
     ) {
       throw new Error("config is not set");
     }
@@ -47,7 +45,6 @@ export class BaseClient extends EventEmitter {
       channelSecret,
       discordWebhook,
       discordToken,
-      discordChannelId,
       baseLine: { channelAccessToken, channelSecret },
     };
 
@@ -149,7 +146,6 @@ export interface ClientOptionals {
   channelSecret: string;
   discordWebhook: string;
   discordToken: string;
-  discordChannelId: string;
 }
 
 export interface ClientConfig extends Required<ClientOptionals> {
