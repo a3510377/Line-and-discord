@@ -95,6 +95,10 @@ export class Client extends BaseClient {
 
     this.client.on("messageCreate", async (event) => {
       const { channel, reference, author } = event;
+      this.line.pushMessage("C808299b4d4ef509bd0807f637f8cb9b0", {
+        type: "text",
+        text: "awa",
+      });
 
       if (event.channelId !== process.env.DISCORD_CHANNEL_ID || author.bot)
         return;

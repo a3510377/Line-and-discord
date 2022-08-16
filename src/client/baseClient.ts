@@ -27,7 +27,6 @@ export class BaseClient extends EventEmitter {
     const {
       channelAccessToken = process.env.LINE_BOT_ACCESS_TOKEN,
       channelSecret = process.env.LINE_BOT_SECRET,
-      notifyToken = process.env.NOTIFY_TOKEN,
       discordWebhook = process.env.DISCORD_WEBHOOK,
       discordToken = process.env.DISCORD_TOKEN,
       discordChannelId = process.env.DISCORD_CHANNEL_ID,
@@ -36,7 +35,6 @@ export class BaseClient extends EventEmitter {
     if (
       !channelAccessToken ||
       !channelSecret ||
-      !notifyToken ||
       !discordWebhook ||
       !discordToken ||
       !discordChannelId
@@ -47,7 +45,6 @@ export class BaseClient extends EventEmitter {
     this.config = {
       channelAccessToken,
       channelSecret,
-      notifyToken,
       discordWebhook,
       discordToken,
       discordChannelId,
@@ -150,7 +147,6 @@ export interface BaseClient {
 export interface ClientOptionals {
   channelAccessToken: string;
   channelSecret: string;
-  notifyToken: string;
   discordWebhook: string;
   discordToken: string;
   discordChannelId: string;
