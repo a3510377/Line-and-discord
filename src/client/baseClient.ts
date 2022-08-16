@@ -1,3 +1,5 @@
+import axios from "axios";
+import EventEmitter from "events";
 import express, { Express } from "express";
 import { Client as LineClient, middleware, WebhookEvent } from "@line/bot-sdk";
 import {
@@ -7,8 +9,9 @@ import {
   AttachmentPayload,
   GatewayIntentBits,
 } from "discord.js";
-import EventEmitter from "events";
+
 import { ClientEventsArgs } from "./types";
+import { getMimeType } from "../utils/File";
 
 export class BaseClient extends EventEmitter {
   public readonly webhook: WebhookClient;
@@ -62,9 +65,24 @@ export class BaseClient extends EventEmitter {
         GatewayIntentBits.GuildMessageReactions,
       ],
     });
-    this.sendDiscord = this.webhook.send;
+    this.sendDiscord = (...args) => this.webhook.send(...args);
 
     this.init();
+  }
+
+  public async getLINEFile(
+    fileName: string,
+    messageId: string
+  ): Promise<AttachmentPayload> {
+    return await axios
+      .get(`https://api-data.line.me/v2/bot/message/${messageId}/content`, {
+        headers: { Authorization: `Bearer ${this.config.channelAccessToken}` },
+        responseType: "arraybuffer",
+      })
+      .then(({ data }) => ({
+        name: `${fileName}.${getMimeType(new Uint8Array(data))}`,
+        attachment: data,
+      }));
   }
 
   protected init() {

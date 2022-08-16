@@ -1,4 +1,5 @@
 import axios from "axios";
+import FormData from "form-data";
 import { BaseClient } from "./baseClient";
 
 export class Client extends BaseClient {
@@ -36,8 +37,12 @@ export class Client extends BaseClient {
         case "image":
           switch (msg.contentProvider.type) {
             case "line": {
-              const { contentProvider } = msg;
-              contentProvider;
+              this.sendDiscord({
+                avatarURL: profile.pictureUrl,
+                username: profile.displayName,
+                content: "發送了一張圖片",
+                files: [(await this.getLINEFile("MEDIA", msg.id)).attachment],
+              });
 
               break;
             }
@@ -56,7 +61,7 @@ export class Client extends BaseClient {
     });
 
     this.client.on("messageCreate", async (event) => {
-      const { channel, reference, attachments, member, author } = event;
+      const { channel, reference, author } = event;
 
       if (event.channelId !== process.env.DISCORD_CHANNEL_ID || author.bot)
         return;
@@ -69,39 +74,6 @@ export class Client extends BaseClient {
           content = `${referenceMsg.content || "..."} > ${content}`;
         }
       }
-      if (event.content) {
-        const bodyData = new FormData();
-
-        bodyData.append(
-          "message",
-          `<${member?.nickname || author.username}>:\n${content}`
-        );
-
-        axios
-          .post("https://notify-api.line.me/api/notify", bodyData, {
-            headers: { Authorization: `Bearer ${process.env.NOTIFY_TOKEN}` },
-          })
-          .catch();
-      }
-      await Promise.all(
-        attachments.map(async (data) => {
-          const bodyData = new FormData();
-          if (data.contentType?.split("/")[0] === "image") {
-            bodyData.append(
-              "message",
-              `<${member?.nickname || author.username}>:`
-            );
-            bodyData.append("imageFullsize", data.url);
-            bodyData.append("imageThumbnail", data.url);
-          } else event.content += `\n${data.url}`;
-          // deliveryContext: { isRedelivery: false },
-          axios
-            .post("https://notify-api.line.me/api/notify", bodyData, {
-              headers: { Authorization: `Bearer ${process.env.NOTIFY_TOKEN}` },
-            })
-            .catch();
-        })
-      );
     });
   }
 }
