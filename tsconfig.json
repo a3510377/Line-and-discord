@@ -1,9 +1,9 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
+    "target": "es5",
     "types": ["node"],
     "sourceMap": true,
-    "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowJs": true,
     "noUnusedLocals": false,
