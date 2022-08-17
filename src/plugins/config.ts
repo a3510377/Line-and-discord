@@ -1,19 +1,48 @@
 import { BasePlugin, BaseClient } from ".";
 
 export class ConfigPlugin extends BasePlugin {
+  public check_ids: {
+    channel: string;
+    guild: string;
+    webhook: string;
+  }[] = [];
   public register(_: BaseClient) {
     _.on("message", async (event) => {
-      console.log(event.message, event.source.type);
+      if (event.message.type !== "text" || event.source.type !== "group")
+        return;
 
-      if (
-        event.message.type === "text" &&
-        event.message.text === "!!link" &&
-        event.source.type === "group"
-      ) {
-        await _.line.pushMessage(event.source.groupId, {
+      const {
+        source: { groupId },
+      } = event;
+
+      const args = event.message.text.trim().split(" ");
+      const commandName = args.shift();
+      if (!commandName) return;
+
+      if (commandName === "!!link") {
+        await _.line.pushMessage(groupId, {
           type: "text",
-          text: `伺服器 ID: ${event.source.groupId}`,
+          text: `伺服器 ID: ${groupId}`,
         });
+      } else if (commandName.startsWith("!!link")) {
+        const [type, text] = args;
+        if (type === "check" && text) {
+          const data = this.check_ids.find(
+            (_) => _.channel === text && _.guild === groupId
+          );
+          if (!data) {
+            _.line.pushMessage(groupId, {
+              type: "text",
+              text: "確認數據過期或不存在\n請於 discord channel 中取得新的確認數據 ( !!link <guild id> )",
+            });
+          } else {
+            _.createGuildData(data.channel, data.guild, data.webhook);
+            _.line.pushMessage(groupId, {
+              type: "text",
+              text: `確認完畢:\n${data.guild} -> ${data.channel}\n${data.guild} <- ${data.channel}`,
+            });
+          }
+        }
       }
     });
     _.client.on("messageCreate", async ({ content, author, channel }) => {
@@ -35,8 +64,30 @@ export class ConfigPlugin extends BasePlugin {
             .then((webhook) => {
               console.log(webhook);
 
-              _.createGuildData(channel.id, guildId, webhook.url);
-              channel.send("創建成功");
+              channel.send(
+                `創建成功\n請於 5 分鐘內於 Line 上發送 \`!!link check ${channel.id}\``
+              );
+              this.check_ids.push({
+                channel: channel.id,
+                guild: guildId,
+                webhook: webhook.url,
+              });
+
+              setTimeout(() => {
+                this.check_ids = this.check_ids.filter((check) => {
+                  const {
+                    guild,
+                    channel: channelId,
+                    webhook: webhookUrl,
+                  } = check;
+
+                  return (
+                    channelId !== channel.id &&
+                    webhookUrl !== webhook.url &&
+                    guild !== guildId
+                  );
+                });
+              }, 1e3 * 60 * 5); // 5 minutes
             })
             .catch(() => {
               channel.send("創建失敗\n機器人沒有創建 webhook 的權限");

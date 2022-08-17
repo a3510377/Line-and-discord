@@ -137,7 +137,7 @@ export class BaseClient extends EventEmitter {
     channelId: string,
     lineGuildId: string,
     webhookURL: string
-  ) {
+  ): void {
     const data = this.getStoreData();
 
     data[lineGuildId] = { channelId, webhookURL };
