@@ -13,31 +13,33 @@ export default class ConfigPlugin extends BasePlugin {
 
       const {
         source: { groupId },
+        replyToken,
       } = event;
 
       const args = event.message.text.trim().split(" ");
       const commandName = args.shift();
       if (!commandName) return;
 
-      if (commandName === "!!link") {
-        await _.line.pushMessage(groupId, {
-          type: "text",
-          text: `伺服器 ID: ${groupId}`,
-        });
-      } else if (commandName.startsWith("!!link")) {
+      if (commandName.startsWith("!!link")) {
         const [type, text] = args;
-        if (type === "check" && text) {
+
+        if (type === void 0) {
+          await _.line.replyMessage(replyToken, {
+            type: "text",
+            text: `伺服器 ID: ${groupId}`,
+          });
+        } else if (type === "check" && text) {
           const data = this.check_ids.find(
             (_) => _.channel === text && _.guild === groupId
           );
           if (!data) {
-            _.line.pushMessage(groupId, {
+            _.line.replyMessage(replyToken, {
               type: "text",
               text: "確認數據過期或不存在\n請於 discord channel 中取得新的確認數據 ( !!link <guild id> )",
             });
           } else {
             _.createGuildData(data.channel, data.guild, data.webhook);
-            _.line.pushMessage(groupId, {
+            _.line.replyMessage(replyToken, {
               type: "text",
               text: `確認完畢:\n${data.guild} -> ${data.channel}\n${data.guild} <- ${data.channel}`,
             });
@@ -53,7 +55,10 @@ export default class ConfigPlugin extends BasePlugin {
         if (args.length > 1) {
           const [, guildId] = args;
 
-          if (_.getConfigByGuildID(guildId)) {
+          if (
+            _.getConfigByGuildID(guildId) ||
+            _.getConfigByChannelID(channel.id)
+          ) {
             channel.send(`${guildId} 該伺服器已被連結過`);
 
             return;
