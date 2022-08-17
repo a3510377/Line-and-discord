@@ -14,6 +14,7 @@ import {
 import { ClientEventsArgs } from "./types";
 import { getFileExt } from "../utils/File";
 import { BasePlugin } from "../plugins";
+import path from "path";
 
 export class BaseClient extends EventEmitter {
   public readonly server: Express;
@@ -97,7 +98,14 @@ export class BaseClient extends EventEmitter {
     );
   }
 
-  public addPlugin(plugin: BasePlugin) {
+  public async addPlugin(pluginOrPath: BasePlugin | string) {
+    let plugin: BasePlugin;
+    if (typeof pluginOrPath === "string") {
+      delete require.cache[path.resolve(pluginOrPath)];
+
+      plugin = (await import(pluginOrPath).catch()).default;
+    } else plugin = pluginOrPath;
+
     if (this.plugins[plugin.name]) {
       throw new Error(`Plugin ${plugin.name} is already registered`);
     }

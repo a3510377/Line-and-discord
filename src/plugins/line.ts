@@ -3,7 +3,7 @@ import { WebhookClient } from "discord.js";
 
 import { BasePlugin, BaseClient } from ".";
 
-export class LinePlugin extends BasePlugin {
+export default class LinePlugin extends BasePlugin {
   public register(bot: BaseClient) {
     bot.on("message", async (event) => {
       console.log(event);

@@ -1,6 +1,6 @@
 import { BasePlugin, BaseClient } from ".";
 
-export class ConfigPlugin extends BasePlugin {
+export default class ConfigPlugin extends BasePlugin {
   public check_ids: {
     channel: string;
     guild: string;

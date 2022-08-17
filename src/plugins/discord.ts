@@ -1,7 +1,7 @@
 import { Message } from "@line/bot-sdk";
 import { BasePlugin, BaseClient } from ".";
 
-export class DiscordPlugin extends BasePlugin {
+export default class DiscordPlugin extends BasePlugin {
   public register(_: BaseClient) {
     _.client
       .on("ready", (bot) => {
