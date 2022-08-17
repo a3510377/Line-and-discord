@@ -41,7 +41,7 @@ export default class ConfigPlugin extends BasePlugin {
             _.createGuildData(data.channel, data.guild, data.webhook);
             _.line.replyMessage(replyToken, {
               type: "text",
-              text: `確認完畢:\n${data.guild} -> ${data.channel}\n${data.guild} <- ${data.channel}`,
+              text: `確認完畢:\n${data.guild} <--> ${data.channel}`,
             });
           }
         }
