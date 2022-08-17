@@ -29,23 +29,16 @@ export class BaseClient extends EventEmitter {
     const {
       channelAccessToken = process.env.LINE_BOT_ACCESS_TOKEN,
       channelSecret = process.env.LINE_BOT_SECRET,
-      discordWebhook = process.env.DISCORD_WEBHOOK,
       discordToken = process.env.DISCORD_TOKEN,
     } = options || {};
 
-    if (
-      !channelAccessToken ||
-      !channelSecret ||
-      !discordWebhook ||
-      !discordToken
-    ) {
+    if (!channelAccessToken || !channelSecret || !discordToken) {
       throw new Error("config is not set");
     }
 
     this.config = {
       channelAccessToken,
       channelSecret,
-      discordWebhook,
       discordToken,
       baseLine: { channelAccessToken, channelSecret },
     };
@@ -202,7 +195,6 @@ export interface BaseClient {
 export interface ClientOptionals {
   channelAccessToken: string;
   channelSecret: string;
-  discordWebhook: string;
   discordToken: string;
 }
 
