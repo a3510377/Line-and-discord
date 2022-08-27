@@ -6,7 +6,8 @@
   "author": "猴子 <a102009102009@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node -r dotenv/config ./src"
+    "start": "ts-node -r dotenv/config ./src",
+    "build": "tsc --build --clean && tsc --build"
   },
   "dependencies": {
     "@line/bot-sdk": "^7.5.0",

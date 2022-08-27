@@ -1,9 +1,11 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
+    "moduleResolution": "Node",
     "target": "es5",
+    "skipLibCheck": true,
     "types": ["node"],
-    "sourceMap": true,
+    "sourceMap": false,
     "esModuleInterop": true,
     "allowJs": true,
     "noUnusedLocals": false,
@@ -12,6 +14,5 @@
     "outDir": "./dist",
     "strict": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "include": ["src"]
 }
