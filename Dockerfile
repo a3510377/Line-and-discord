@@ -13,3 +13,5 @@ COPY ./src ./src
 COPY --from=builder /package.json ./package.json
 
 CMD yarn run start
+
+EXPOSE 5000

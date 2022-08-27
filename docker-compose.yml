@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  ngrok:
+    image: ngrok/ngrok:latest
+    restart: unless-stopped
+    command: ["http", "line-and-discord:5000"]
+    # environment:
+    #   - NGROK_AUTHTOKEN=
+
+  line-and-discord:
+    image: a3510377/line-and-discord:latest
+    restart: unless-stopped
+    expose:
+      - 5000
+    volumes:
+      - /servers/config/line-and-discord:/app/data
+    # environment:
+    #   - LINE_BOT_ACCESS_TOKEN=
+    #   - LINE_BOT_SECRET=
+    #   - DISCORD_TOKEN=

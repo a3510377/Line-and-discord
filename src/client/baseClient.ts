@@ -122,13 +122,15 @@ export class BaseClient extends EventEmitter {
   }
 
   protected writeStoreData(data: StoreConfig): void {
-    fs.writeFileSync("./store.json", JSON.stringify(data), {
+    if (!fs.existsSync("data")) fs.mkdirSync("data", { recursive: true });
+
+    fs.writeFileSync("data/store.json", JSON.stringify(data), {
       encoding: "utf8",
     });
   }
   public getStoreData(): StoreConfig {
     try {
-      return JSON.parse(fs.readFileSync("./store.json", "utf8"));
+      return JSON.parse(fs.readFileSync("data/store.json", "utf8"));
     } catch {
       this.writeStoreData({});
       return this.getStoreData();
