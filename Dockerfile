@@ -11,6 +11,7 @@ WORKDIR /build
 
 COPY --from=node_modules /node_modules/ ./node_modules/
 COPY --from=node_modules /package.json .
+COPY --from=node_modules /yarn.lock .
 COPY ./tsconfig.json .
 COPY ./src ./src
 
@@ -23,7 +24,6 @@ WORKDIR /app
 COPY --from=node_modules /node_modules/ ./node_modules/
 COPY --from=node_modules /package.json ./package.json
 COPY --from=builder /build/dist/ ./dist/
-RUN ls
 
 CMD node dist
 EXPOSE 5000
