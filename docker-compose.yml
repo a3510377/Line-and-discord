@@ -9,7 +9,7 @@ services:
     #   - NGROK_AUTHTOKEN=
 
   line-and-discord:
-    image: a3510377/line-and-discord:latest
+    image: a3510377/line-and-discord:linux-arm64
     restart: unless-stopped
     expose:
       - 5000
