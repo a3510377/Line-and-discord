@@ -9,8 +9,8 @@ RUN yarn --prod --silent
 FROM base as builder
 WORKDIR /build
 
-COPY --from=node_modules /node_modules/ /build/node_modules/
-COPY --from=node_modules /package.json ./package.json
+COPY --from=node_modules /node_modules/ ./node_modules/
+COPY --from=node_modules /package.json .
 COPY ./tsconfig.json .
 COPY ./src ./src
 
@@ -20,9 +20,9 @@ RUN yarn run build
 FROM base
 WORKDIR /app
 
-COPY --from=node_modules /node_modules/ /app/node_modules/
+COPY --from=node_modules /node_modules/ ./node_modules/
 COPY --from=node_modules /package.json ./package.json
-COPY --from=builder /dist/ /dist/
+COPY --from=builder /build/dist/ ./dist/
 RUN ls
 
 CMD node dist
