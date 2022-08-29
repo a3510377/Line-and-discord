@@ -3,6 +3,8 @@ version: "3.9"
 services:
   line-and-discord:
     image: a3510377/line-and-discord:linux-arm64
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
     depends_on:
       - ngrok
@@ -19,6 +21,8 @@ services:
   ngrok:
     image: a3510377/node-ngrok:linux-arm64
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     expose:
       - 1333
     environment:
