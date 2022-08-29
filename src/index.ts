@@ -18,7 +18,7 @@ const {
 if (process.env.NGROK || NGROK_URL) {
   const setUrl = () => {
     axios
-      .get(NGROK_URL || "line-and-discord:5000")
+      .get(NGROK_URL || "ngrok:1333")
       .then(({ data }) => client.line.setWebhookEndpointUrl(data));
   };
   setUrl();
