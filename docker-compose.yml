@@ -14,6 +14,7 @@ services:
       LINE_BOT_ACCESS_TOKEN: ${LINE_BOT_ACCESS_TOKEN}
       LINE_BOT_SECRET: ${LINE_BOT_SECRET}
       DISCORD_TOKEN: ${DISCORD_TOKEN}
+      NGROK: true
 
   ngrok:
     image: a3510377/node-ngrok:linux-arm64
