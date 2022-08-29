@@ -3,95 +3,92 @@ import { BasePlugin, BaseClient } from ".";
 
 export default class DiscordPlugin extends BasePlugin {
   public register(_: BaseClient) {
-    _.client
-      .on("ready", (bot) => {
-        console.log(`Discord bot ${bot.user.username} is ready.`);
-      })
-      .on("messageCreate", async (msg) => {
-        const { channel, reference, member, author } = msg;
+    _.client.on("ready", (bot) => {
+      console.log(`Discord bot ${bot.user.username} is ready.`);
+    });
+    _.client.on("messageCreate", async (msg) => {
+      const { channel, reference, member, author } = msg;
 
-        console.log(`${channel} > ${author} ${msg.content}`);
+      console.log(`${channel} > ${author} ${msg.content}`);
 
-        const config = _.getConfigByChannelID(channel.id);
-        const msgList: Message[] = [];
-        const sender = {
-          name: member?.nickname || author.username,
-          iconUrl: author.avatarURL()?.replace(/\.webp$/, ".png") || void 0,
-        };
+      const config = _.getConfigByChannelID(channel.id);
+      const msgList: Message[] = [];
+      const sender = {
+        name: member?.nickname || author.username,
+        iconUrl: author.avatarURL()?.replace(/\.webp$/, ".png") || void 0,
+      };
 
-        if (
-          !config ||
-          channel.isDMBased() ||
-          author.id === _.client.user?.id ||
-          msg.webhookId
-        )
-          return;
+      if (
+        !config ||
+        channel.isDMBased() ||
+        author.id === _.client.user?.id ||
+        msg.webhookId
+      )
+        return;
 
-        const { guildId } = config;
+      const { guildId } = config;
 
-        let content = msg.content;
+      let content = msg.content;
 
-        if (reference?.messageId) {
-          const referenceMsg = await channel.messages.fetch(
-            reference.messageId
-          );
+      if (reference?.messageId) {
+        const referenceMsg = await channel.messages.fetch(reference.messageId);
 
-          if (referenceMsg) {
-            const userName =
-              referenceMsg.member?.nickname || referenceMsg.author.username;
-            content = [
-              `${userName}-${referenceMsg.content}`,
-              referenceMsg.attachments.size > 0
-                ? " ( attachments in message... )"
-                : "",
-              ` > ${content}`,
-            ].join("");
-          }
+        if (referenceMsg) {
+          const userName =
+            referenceMsg.member?.nickname || referenceMsg.author.username;
+          content = [
+            `${userName}-${referenceMsg.content}`,
+            referenceMsg.attachments.size > 0
+              ? " ( attachments in message... )"
+              : "",
+            ` > ${content}`,
+          ].join("");
         }
+      }
 
-        if (content) msgList.push({ type: "text", text: content });
+      if (content) msgList.push({ type: "text", text: content });
 
-        msg.attachments.each(async ({ contentType, url }) => {
-          if (!contentType) return msgList.push({ type: "text", text: url });
+      msg.attachments.each(async ({ contentType, url }) => {
+        if (!contentType) return msgList.push({ type: "text", text: url });
 
-          if (/^(image|video)\//.test(contentType)) {
-            msgList.push({
-              type: contentType.startsWith("image/") ? "image" : "video",
-              previewImageUrl: url,
-              originalContentUrl: url,
-            });
-          } else if (contentType === "audio/m4a") {
-            msgList.push({
-              type: "audio",
-              originalContentUrl: url,
-              duration: 0,
-            });
-          } else msgList.push({ type: "text", text: url });
-        });
-
-        console.log(msgList);
-
-        if (msgList.length <= 0) return;
-
-        _.line
-          .pushMessage(
-            guildId,
-            msgList.map((msg) => ({ sender, ...msg }))
-          )
-          .catch(() => {
-            _.line.pushMessage(
-              guildId,
-              msgList.map((msg) => {
-                if (msg.type === "image" || msg.type === "video") {
-                  return {
-                    type: "text",
-                    text: msg.originalContentUrl || "阿哩勒出錯了!!",
-                  };
-                }
-                return { ...msg, sender };
-              })
-            );
+        if (/^(image|video)\//.test(contentType)) {
+          msgList.push({
+            type: contentType.startsWith("image/") ? "image" : "video",
+            previewImageUrl: url,
+            originalContentUrl: url,
           });
+        } else if (contentType === "audio/m4a") {
+          msgList.push({
+            type: "audio",
+            originalContentUrl: url,
+            duration: 0,
+          });
+        } else msgList.push({ type: "text", text: url });
       });
+
+      console.log(msgList);
+
+      if (msgList.length <= 0) return;
+
+      _.line
+        .pushMessage(
+          guildId,
+          msgList.map((msg) => ({ sender, ...msg }))
+        )
+        .catch(() => {
+          _.line.pushMessage(
+            guildId,
+            msgList.map((msg) => {
+              if (msg.type === "image" || msg.type === "video") {
+                return {
+                  type: "text",
+                  text: msg.originalContentUrl || "阿哩勒出錯了!!",
+                };
+              }
+              return { ...msg, sender };
+            })
+          );
+        });
+    });
   }
 }
