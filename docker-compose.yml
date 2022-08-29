@@ -4,6 +4,8 @@ services:
   line-and-discord:
     image: a3510377/line-and-discord:linux-arm64
     restart: unless-stopped
+    depends_on:
+      - ngrok
     expose:
       - 5000
     volumes:
@@ -12,7 +14,6 @@ services:
       LINE_BOT_ACCESS_TOKEN: ${LINE_BOT_ACCESS_TOKEN}
       LINE_BOT_SECRET: ${LINE_BOT_SECRET}
       DISCORD_TOKEN: ${DISCORD_TOKEN}
-      NGROK_URL: ngrok:1333
 
   ngrok:
     image: a3510377/node-ngrok:linux-arm64
