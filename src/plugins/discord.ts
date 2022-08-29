@@ -3,9 +3,6 @@ import { BasePlugin, BaseClient } from ".";
 
 export default class DiscordPlugin extends BasePlugin {
   public register(_: BaseClient) {
-    _.client.on("ready", (bot) => {
-      console.log(`Discord bot ${bot.user.username} is ready.`);
-    });
     _.client.on("messageCreate", async (msg) => {
       const { channel, reference, member, author } = msg;
 
@@ -89,6 +86,10 @@ export default class DiscordPlugin extends BasePlugin {
             })
           );
         });
+
+      _.client.on("ready", (bot) => {
+        console.log(`Discord bot ${bot.user.username} is ready.`);
+      });
     });
   }
 }
