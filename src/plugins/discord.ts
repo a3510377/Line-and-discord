@@ -10,6 +10,8 @@ export default class DiscordPlugin extends BasePlugin {
       .on("messageCreate", async (msg) => {
         const { channel, reference, member, author } = msg;
 
+        console.log(`${channel} > ${author} ${msg.content}`);
+
         const config = _.getConfigByChannelID(channel.id);
         const msgList: Message[] = [];
         const sender = {
@@ -67,6 +69,8 @@ export default class DiscordPlugin extends BasePlugin {
           } else msgList.push({ type: "text", text: url });
         });
 
+        console.log(msgList);
+
         if (msgList.length <= 0) return;
 
         _.line
@@ -75,15 +79,18 @@ export default class DiscordPlugin extends BasePlugin {
             msgList.map((msg) => ({ sender, ...msg }))
           )
           .catch(() => {
-            msgList.map((msg) => {
-              if (msg.type === "image" || msg.type === "video") {
-                return {
-                  type: "text",
-                  text: msg.originalContentUrl || "阿哩勒出錯了!!",
-                };
-              }
-              return { ...msg, sender };
-            });
+            _.line.pushMessage(
+              guildId,
+              msgList.map((msg) => {
+                if (msg.type === "image" || msg.type === "video") {
+                  return {
+                    type: "text",
+                    text: msg.originalContentUrl || "阿哩勒出錯了!!",
+                  };
+                }
+                return { ...msg, sender };
+              })
+            );
           });
       });
   }
