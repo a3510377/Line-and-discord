@@ -1,12 +1,24 @@
 import { Message } from "@line/bot-sdk";
+import { TextChannel } from "discord.js";
 import { BasePlugin, BaseClient } from ".";
 
 export default class DiscordPlugin extends BasePlugin {
   public register(_: BaseClient) {
     _.client.on("messageCreate", async (msg) => {
-      const { channel, reference, member, author } = msg;
+      const {
+        channelId,
+        channel: channel_,
+        reference,
+        member,
+        author,
+        guild,
+      } = msg;
+      if (!guild || !channel_.isTextBased() || !channel_.isDMBased()) return;
 
-      console.log(`${channel} > ${author} ${msg.content}`);
+      const channel = <TextChannel>guild.channels.cache.get(channelId) || {
+        name: "unknown",
+        ...channel_,
+      };
 
       const config = _.getConfigByChannelID(channel.id);
       const msgList: Message[] = [];
@@ -15,13 +27,7 @@ export default class DiscordPlugin extends BasePlugin {
         iconUrl: author.avatarURL()?.replace(/\.webp$/, ".png") || void 0,
       };
 
-      if (
-        !config ||
-        channel.isDMBased() ||
-        author.id === _.client.user?.id ||
-        msg.webhookId
-      )
-        return;
+      if (!config || author.id === _.client.user?.id || msg.webhookId) return;
 
       const { guildId } = config;
 
@@ -63,9 +69,12 @@ export default class DiscordPlugin extends BasePlugin {
         } else msgList.push({ type: "text", text: url });
       });
 
-      console.log(msgList);
-
       if (msgList.length <= 0) return;
+
+      console.log(
+        `${channel.name}-${author.username} > ${guildId}`,
+        JSON.stringify(msgList)
+      );
 
       _.line
         .pushMessage(
@@ -73,6 +82,8 @@ export default class DiscordPlugin extends BasePlugin {
           msgList.map((msg) => ({ sender, ...msg }))
         )
         .catch(() => {
+          console.log("push failed");
+
           _.line.pushMessage(
             guildId,
             msgList.map((msg) => {

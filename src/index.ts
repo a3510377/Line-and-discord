@@ -5,8 +5,8 @@ import { Client } from "./client";
 console.clear();
 
 process
-  .on("uncaughtException", (er: Error) => console.error(er.toString()))
-  .on("unhandledRejection", (er: Error) => console.error(er.toString()));
+  .on("uncaughtException", console.error)
+  .on("unhandledRejection", console.error);
 
 const client = new Client();
 client.start();
@@ -23,5 +23,5 @@ if (process.env.NGROK || NGROK_URL) {
     });
   };
   setUrl();
-  setInterval(setUrl, 1e3 * 60 * 60); // 1 hour
+  setInterval(setUrl, 1e3 * 60 * 60 * 24); // 1 day
 }

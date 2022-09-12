@@ -6,7 +6,6 @@ import { BasePlugin, BaseClient } from ".";
 export default class LinePlugin extends BasePlugin {
   public register(bot: BaseClient) {
     bot.on("message", async (event) => {
-      console.log(event);
       const { source, message: msg } = event;
 
       if (!source.userId || source.type !== "group") return;
@@ -20,6 +19,11 @@ export default class LinePlugin extends BasePlugin {
       const webhook = new WebhookClient({ url: config.webhookURL });
 
       const type = msg.type;
+
+      console.log(
+        `${source.groupId}-${profile.displayName} > ${config.channelId}`,
+        JSON.stringify(event)
+      );
 
       if (type === "text") {
         // TEXT
