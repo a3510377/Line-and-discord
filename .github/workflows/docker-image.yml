@@ -51,7 +51,7 @@ jobs:
           file: ./dockerfile
           platforms: linux/arm64
           push: true
-          tags: ghcr.io/a3510377/line-and-discord:arm64-latest
+          tags: ghcr.io/a3510377/line-and-discord:arm64-latest,ghcr.io/a3510377/line-and-discord:latest
 
       - uses: docker/build-push-action@v4
         with:
