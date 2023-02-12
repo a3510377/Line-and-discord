@@ -48,7 +48,14 @@ jobs:
       - uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./Dockerfile.arm64
+          file: ./dockerfile
           platforms: linux/arm64
+          push: true
+          tags: ghcr.io/a3510377/line-and-discord:arm64-latest
+
+      - uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./dockerfile
           push: true
           tags: ghcr.io/a3510377/line-and-discord:latest
