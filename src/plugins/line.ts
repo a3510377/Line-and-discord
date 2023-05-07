@@ -8,6 +8,7 @@ export default class LinePlugin extends BasePlugin {
     bot.on("message", async (event) => {
       const { source, message: msg } = event;
 
+      console.log(source.userId, msg);
       if (!source.userId || source.type !== "group") return;
       const config = bot.getConfigByGuildID(source.groupId);
       if (!config) return;
