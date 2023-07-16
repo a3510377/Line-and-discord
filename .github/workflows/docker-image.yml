@@ -1,20 +1,20 @@
-name: Docker
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
+name: releaser
 on:
   workflow_dispatch:
   push:
     branches:
       - master
+    tags:
+      - "v*"
     paths-ignore:
       - README.md
       - .github/**
+      - .vscode/**
+      - "!.github/workflows/**"
   # schedule:
   #   - cron: 33 17 * * *
+  release:
+    types: [created]
   pull_request:
     branches:
       - master
@@ -28,36 +28,50 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-      - name: Git checkout for Github repository workspace
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v2
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: "v2.1.1"
 
       - name: Setup Docker buildx
         uses: docker/setup-buildx-action@v2
 
+      # https://github.com/docker/login-action
       - name: Login to registry
         uses: docker/login-action@v2
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: docker/build-push-action@v4
+      # https://github.com/docker/metadata-action
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
         with:
-          context: .
-          file: ./Dockerfile
-          platforms: linux/arm64
-          push: true
-          continue-on-error: true
-          tags: ghcr.io/a3510377/line-and-discord:arm64-latest,ghcr.io/a3510377/line-and-discord:latest
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,enable=true,priority=600,prefix=,suffix=,event=branch
+            type=ref,enable=true,priority=600,prefix=,suffix=,event=tag
+            type=ref,enable=true,priority=600,prefix=pr-,suffix=,event=pr
 
       - uses: docker/build-push-action@v4
         with:
           context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           file: ./Dockerfile
-          push: true
-          continue-on-error: true
-          tags: ghcr.io/a3510377/line-and-discord:latest
+          platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8
