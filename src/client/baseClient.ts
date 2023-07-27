@@ -85,6 +85,7 @@ export class BaseClient extends EventEmitter {
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         events.forEach((event) => this.emit(event.type, <any>event));
+        console.log(events);
 
         res.send("ok");
       }
