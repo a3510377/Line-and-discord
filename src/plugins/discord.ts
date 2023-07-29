@@ -7,17 +7,18 @@ export default class DiscordPlugin extends BasePlugin {
     _.client.on("messageCreate", async (msg) => {
       const {
         channelId,
-        channel: channel_,
+        channel: msgChannel,
         reference,
         member,
         author,
         guild,
       } = msg;
-      if (!guild || !channel_.isTextBased() || !channel_.isDMBased()) return;
+      if (!guild || !msgChannel.isTextBased() || !msgChannel.isDMBased())
+        return;
 
       const channel = <TextChannel>guild.channels.cache.get(channelId) || {
         name: "unknown",
-        ...channel_,
+        ...msgChannel,
       };
 
       const config = _.getConfigByChannelID(channel.id);

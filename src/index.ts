@@ -16,10 +16,14 @@ const {
 } = process;
 
 if (process.env.NGROK || NGROK_URL) {
+  let oldUrl = "";
   const setUrl = () => {
     axios.get(NGROK_URL || "http://ngrok:1333").then(({ data }) => {
-      client.line.setWebhookEndpointUrl(`${data}/callback`);
-      console.log("Webhook endpoint set to:", data);
+      if (oldUrl !== data) {
+        client.line.setWebhookEndpointUrl(`${data}/callback`);
+        console.log("Webhook endpoint set to:", data);
+        oldUrl = data;
+      }
     });
   };
   setUrl();
