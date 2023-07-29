@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   line-and-discord:
-    image: a3510377/line-and-discord:linux-arm64
+    image: ghcr.io/a3510377/line-and-discord:latest
     labels:
       - com.centurylinklabs.watchtower.enable=true
     restart: unless-stopped
@@ -19,7 +19,7 @@ services:
       NGROK: true
 
   ngrok:
-    image: a3510377/node-ngrok:linux-arm64
+    image: ghcr.io/a3510377/node-ngrok:latest
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
